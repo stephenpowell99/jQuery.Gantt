@@ -39,14 +39,16 @@
             startPos: new Date(),
             navigate: "buttons",
             scale: "days",
+            defaultHourlyScaleStep: 6,
             useCookie: false,
             maxScale: "months",
             minScale: "hours",
             waitText: "Please wait...",
             onItemClick: function (data) { return; },
             onAddClick: function (data) { return; },
-            onRender: function() { return; },
-            scrollToToday: true
+            onRender: function () { return; },
+            scrollToToday: true,
+            singleDateLine: false
         };
 
         // custom selector `:findday` used to match on specified day in ms.
@@ -281,7 +283,7 @@
                     } else {
                         core.repositionLabel(element);
                     }
-                // or, scroll the grid to the left most date in the panel
+                    // or, scroll the grid to the left most date in the panel
                 } else {
                     if ((element.hPosition !== 0)) {
                         if (element.scaleOldWidth) {
@@ -318,12 +320,16 @@
                 var entries = [];
                 $.each(element.data, function (i, entry) {
                     if (i >= element.pageNum * settings.itemsPerPage && i < (element.pageNum * settings.itemsPerPage + settings.itemsPerPage)) {
-                        entries.push('<div class="row name row' + i + (entry.desc ? '' : ' fn-wide') + '" id="rowheader' + i + '" offset="' + i % settings.itemsPerPage * tools.getCellSize() + '">');
+
+                        var cls = false;
+
+
+                        entries.push('<div class="row name row' + i + ($.trim(entry.name) != '' ? ' blockHeader' : '') + (entry.desc ? '' : ' fn-wide') + '" id="rowheader' + i + '" offset="' + i % settings.itemsPerPage * tools.getCellSize() + '">');
                         entries.push('<span class="fn-label' + (entry.cssClass ? ' ' + entry.cssClass : '') + '">' + entry.name + '</span>');
                         entries.push('</div>');
 
                         if (entry.desc) {
-                            entries.push('<div class="row desc row' + i + ' " id="RowdId_' + i + '" data-id="' + entry.id + '">');
+                            entries.push('<div class="row desc row' + i + ($.trim(entry.name) != '' ? ' blockHeader' : '') + ' " id="RowdId_' + i + '" data-id="' + entry.id + '">');
                             entries.push('<span class="fn-label' + (entry.cssClass ? ' ' + entry.cssClass : '') + '">' + entry.desc + '</span>');
                             entries.push('</div>');
                         }
@@ -434,7 +440,7 @@
 
                 // Setup the headings based on the chosen `settings.scale`
                 switch (settings.scale) {
-                    // **Hours**
+                    // **Hours**                         
                     case "hours":
 
                         range = tools.parseTimeRange(element.dateStart, element.dateEnd, element.scaleStep);
@@ -447,35 +453,37 @@
                             var rday = range[i];
 
                             // Fill years
-                            var rfy = rday.getFullYear();
-                            if (rfy !== year) {
-                                yearArr.push(
+                            if (!settings.singleDateLine) {
+                                var rfy = rday.getFullYear();
+                                if (rfy !== year) {
+                                    yearArr.push(
                                     ('<div class="row header year" style="width: '
                                         + tools.getCellSize() * daysInYear
                                         + 'px;"><div class="fn-label">'
                                         + year
                                         + '</div></div>'));
 
-                                year = rfy;
-                                daysInYear = 0;
+                                    year = rfy;
+                                    daysInYear = 0;
+                                }
+                                daysInYear++;
                             }
-                            daysInYear++;
-
 
                             // Fill months
-                            var rm = rday.getMonth();
-                            if (rm !== month) {
-                                monthArr.push(
+                            if (!settings.singleDateLine) {
+                                var rm = rday.getMonth();
+                                if (rm !== month) {
+                                    monthArr.push(
                                     ('<div class="row header month" style="width: '
                                     + tools.getCellSize() * daysInMonth + 'px"><div class="fn-label">'
                                     + settings.months[month]
                                     + '</div></div>'));
 
-                                month = rm;
-                                daysInMonth = 0;
+                                    month = rm;
+                                    daysInMonth = 0;
+                                }
+                                daysInMonth++;
                             }
-                            daysInMonth++;
-
 
                             // Fill days & hours
 
@@ -490,9 +498,12 @@
 
                                 var day_class2 = (today - day === 0) ? ' today' : (holidays.indexOf(getTime) > -1) ? "holiday" : dowClass[getDay];
 
-                                dayArr.push('<div class="row date ' + day_class2 + '" '
-                                        + ' style="width: ' + tools.getCellSize() * hoursInDay + 'px;"> '
-                                        + ' <div class="fn-label">' + day.getDate() + '</div></div>');
+                                if (!settings.singleDateLine) {
+                                    dayArr.push('<div class="row date ' + day_class2 + '" '
+                                            + ' style="width: ' + tools.getCellSize() * hoursInDay + 'px;"> '
+                                            + ' <div class="fn-label">' + day.getDate() + '</div></div>');
+                                }
+
                                 dowArr.push('<div class="row day ' + day_class2 + '" '
                                         + ' style="width: ' + tools.getCellSize() * hoursInDay + 'px;"> '
                                         + ' <div class="fn-label">' + settings.dow[getDay] + '</div></div>');
@@ -513,28 +524,30 @@
 
 
                         // Last year
-                       yearArr.push(
+                        if (!settings.singleDateLine) {
+                            yearArr.push(
                             '<div class="row header year" style="width: '
-                            + tools.getCellSize() * daysInYear + 'px;"><div class="fn-label">'
+                               + tools.getCellSize() * daysInYear + 'px;"><div class="fn-label">'
                             + year
                             + '</div></div>');
+                        
+                            // Last month
+                            monthArr.push(
+                                '<div class="row header month" style="width: '
+                                + tools.getCellSize() * daysInMonth + 'px"><div class="fn-label">'
+                                + settings.months[month]
+                                + '</div></div>');
 
-                        // Last month
-                        monthArr.push(
-                            '<div class="row header month" style="width: '
-                            + tools.getCellSize() * daysInMonth + 'px"><div class="fn-label">'
-                            + settings.months[month]
-                            + '</div></div>');
+                            var day_class = dowClass[day.getDay()];
 
-                        var day_class = dowClass[day.getDay()];
-
-                        if (holidays.indexOf((new Date(day.getFullYear(), day.getMonth(), day.getDate())).getTime()) > -1) {
-                            day_class = "holiday";
-                        }
-
-                        dayArr.push('<div class="row date ' + day_class + '" '
+                            if (holidays.indexOf((new Date(day.getFullYear(), day.getMonth(), day.getDate())).getTime()) > -1) {
+                                day_class = "holiday";
+                            }
+                        
+                            dayArr.push('<div class="row date ' + day_class + '" '
                                 + ' style="width: ' + tools.getCellSize() * hoursInDay + 'px;"> '
                                 + ' <div class="fn-label">' + day.getDate() + '</div></div>');
+                        }
 
                         dowArr.push('<div class="row day ' + day_class + '" '
                                 + ' style="width: ' + tools.getCellSize() * hoursInDay + 'px;"> '
@@ -550,9 +563,52 @@
                         dataPanel.append($('<div class="row"/>').html(dowArr.join("")));
                         dataPanel.append($('<div class="row"/>').html(horArr.join("")));
 
+                        /*
+                        * Generate grid
+                        */
+
+                        var boxWidth = 24 / element.scaleStep;
+
+                        for (var i = 0; i < element.data.length; i++) {
+                            var entry = element.data[i];
+
+                            if (i >= element.pageNum * settings.itemsPerPage && i < (element.pageNum * settings.itemsPerPage + settings.itemsPerPage)) {
+                                var dRow = '<div class="row">';
+                                var prevDay = '';
+
+                                var hoursInDay = 0;
+                                var prevDay = range[0].getDay();
+                                for (var x = 0; x < range.length; x++) {
+
+                                    var day = range[x];
+                                    var dayofWeek = day.getDay();
+
+                                    var todayCls = gridDowClass[dayofWeek];
+                                    var blockHeadCls = $.trim(entry.name) != '' ? ' blockHeader' : ''
+
+                                    if (prevDay != dayofWeek) {
+                                        //if (holidayItems.indexOf((new Date(day.getFullYear(), day.getMonth(), day.getDate())).getTime()) > -1)
+                                        //    todayCls = " holiday";
+                                        var size = (tools.getCellSize() * hoursInDay);
+                                        dRow += '<div class="row daycell ' + todayCls + blockHeadCls + '" id="d' + i + '-' + tools.genId(day.getTime()) + '" style="width:' + size + 'px;"></div>';
+                                        hoursInDay = 0;
+                                    }
+
+                                    prevDay = dayofWeek;
+                                    hoursInDay++;
+                                };
+
+                                // Last Day
+                                var size = (tools.getCellSize() * hoursInDay);
+                                dRow += '<div class="row day ' + todayCls + '" id="d' + i + '-' + tools.genId(day.getTime()) + '" style="width:' + size + 'px;"></div>';
+
+                                dataPanel.append($(dRow + '</div>'));
+                            }
+                        }
+
                         break;
 
-                    // **Weeks**
+                    // **Weeks**                         
                     case "weeks":
                         range = tools.parseWeeksRange(element.dateStart, element.dateEnd);
                         yearArr = ['<div class="row"/>'];
@@ -617,7 +673,7 @@
 
                         break;
 
-                    // **Months**
+                    // **Months**                         
                     case 'months':
                         range = tools.parseMonthsRange(element.dateStart, element.dateEnd);
 
@@ -668,7 +724,7 @@
 
                         break;
 
-                    // **Days (default)**
+                    // **Days (default)**                         
                     default:
                         range = tools.parseDateRange(element.dateStart, element.dateEnd);
 
@@ -864,7 +920,7 @@
                     $(document).mouseup(function () {
                         element.scrollNavigation.scrollerMouseDown = false;
                     });
-                // Button navigation is provided by setting `settings.navigation='buttons'`
+                    // Button navigation is provided by setting `settings.navigation='buttons'`
                 } else {
                     ganttNavigate = $('<div class="navigate" />')
                         .append($('<span role="button" class="nav-link nav-page-back"/>')
@@ -1003,21 +1059,21 @@
                         return "";
                     }
                 };
-				var darkerColor = function(colStr) {
-					try {
-						colStr = colStr.replace('rgb(','').replace(')','');
-						var rgbArr = colStr.split(',');
-						var R = parseInt(rgbArr[0]);
-						var G = parseInt(rgbArr[1]);
-						var B = parseInt(rgbArr[2]);
-						R = R-Math.round(parseInt(R)/7);
-						G = G-Math.round(parseInt(G)/7);
-						B = B-Math.round(parseInt(B)/7);
-						return 'rgb('+R+', '+G+', '+B+')';
-					} catch (err) {
-						return '';
-					}
-				};
+                var darkerColor = function (colStr) {
+                    try {
+                        colStr = colStr.replace('rgb(', '').replace(')', '');
+                        var rgbArr = colStr.split(',');
+                        var R = parseInt(rgbArr[0]);
+                        var G = parseInt(rgbArr[1]);
+                        var B = parseInt(rgbArr[2]);
+                        R = R - Math.round(parseInt(R) / 7);
+                        G = G - Math.round(parseInt(G) / 7);
+                        B = B - Math.round(parseInt(B) / 7);
+                        return 'rgb(' + R + ', ' + G + ', ' + B + ')';
+                    } catch (err) {
+                        return '';
+                    }
+                };
                 $.each(element.data, function (i, entry) {
                     if (i >= element.pageNum * settings.itemsPerPage && i < (element.pageNum * settings.itemsPerPage + settings.itemsPerPage)) {
 
@@ -1025,7 +1081,7 @@
                             var _bar = null;
 
                             switch (settings.scale) {
-                                // **Hourly data**
+                                // **Hourly data**                         
                                 case "hours":
                                     var dFrom = tools.genId(tools.dateDeserialize(day.from).getTime(), element.scaleStep);
                                     var from = $(element).find('#dh-' + dFrom);
@@ -1055,7 +1111,7 @@
                                     datapanel.append(_bar);
                                     break;
 
-                                // **Weekly data**
+                                // **Weekly data**                         
                                 case "weeks":
                                     var dtFrom = tools.dateDeserialize(day.from);
                                     var dtTo = tools.dateDeserialize(day.to);
@@ -1099,7 +1155,7 @@
                                     datapanel.append(_bar);
                                     break;
 
-                                // **Monthly data**
+                                // **Monthly data**                         
                                 case "months":
                                     var dtFrom = tools.dateDeserialize(day.from);
                                     var dtTo = tools.dateDeserialize(day.to);
@@ -1140,7 +1196,7 @@
                                     datapanel.append(_bar);
                                     break;
 
-                                // **Days**
+                                // **Days**                         
                                 default:
                                     var dFrom = tools.genId(tools.dateDeserialize(day.from).getTime());
                                     var dTo = tools.genId(tools.dateDeserialize(day.to).getTime());
@@ -1176,222 +1232,222 @@
                                 $l.css("color", "");
                             }
                         });
-					}
-				});
-				/*
-				 * Dependecies (temporary disabled)
-				 */
-				/*
-				$.each(element.data, function(i, entry) {
-									$.each(entry.values, function(j, day) {
-										if (day.id && day.dep)
-										{
-											var elemA = $("#"+day.id);
-											var elemB = $("#"+day.dep);
+                    }
+                });
+                /*
+                * Dependecies (temporary disabled)
+                */
+                /*
+                $.each(element.data, function(i, entry) {
+                $.each(entry.values, function(j, day) {
+                if (day.id && day.dep)
+                {
+                var elemA = $("#"+day.id);
+                var elemB = $("#"+day.dep);
 				
-											if (elemA.length>0 && elemB.length<=0) {
+                if (elemA.length>0 && elemB.length<=0) {
 												
-												var depS = $("<div id='" + day.id+"-"+day.dep + "Start' class='depStart'></div>");
-												var depE = $("<div id='" + day.id+"-"+day.dep + "End' class='depEnd'></div>");
+                var depS = $("<div id='" + day.id+"-"+day.dep + "Start' class='depStart'></div>");
+                var depE = $("<div id='" + day.id+"-"+day.dep + "End' class='depEnd'></div>");
 				
-												depS.css('background-color', "#888");
-												depE.css('background-color', elemA.css("background-color"));
+                depS.css('background-color', "#888");
+                depE.css('background-color', elemA.css("background-color"));
 				
-												var pa = elemA.position();
-												var ppa = elemA.parent().position();
-												var pA = {
-													left: ppa.left + elemA.outerWidth()+3,
-													top : ppa.top + Math.round(elemA.outerHeight()/2)+2
-												};
+                var pa = elemA.position();
+                var ppa = elemA.parent().position();
+                var pA = {
+                left: ppa.left + elemA.outerWidth()+3,
+                top : ppa.top + Math.round(elemA.outerHeight()/2)+2
+                };
 												
-												depS.css( 'left', pA.left-5 + "px" );
-												depS.css( 'top' , pA.top -4 + "px" );
-												depE.css( 'left', pA.left+16 + "px" );
-												depE.css( 'top' , pA.top -4 + "px" );
+                depS.css( 'left', pA.left-5 + "px" );
+                depS.css( 'top' , pA.top -4 + "px" );
+                depE.css( 'left', pA.left+16 + "px" );
+                depE.css( 'top' , pA.top -4 + "px" );
 												
 												
 												
-												var dep = $("<div id='" + day.id+"-"+day.dep + "Top' class='depLine'></div>");
-												dep.css('left'    , pA.left-5  + "px");
-												dep.css('top'     , pA.top+1  + "px");
-												dep.css('width'   , "25px");
-												dep.css('height'  , "5px");
-												dep.css('border-top', "1px solid #333");
+                var dep = $("<div id='" + day.id+"-"+day.dep + "Top' class='depLine'></div>");
+                dep.css('left'    , pA.left-5  + "px");
+                dep.css('top'     , pA.top+1  + "px");
+                dep.css('width'   , "25px");
+                dep.css('height'  , "5px");
+                dep.css('border-top', "1px solid #333");
 												
-												var el = null;
-												for (i=0;i<element.data.length;i++)
-													for (j=0;j<element.data[i].values.length;j++)
-														if (element.data[i].values[j].id == day.dep)
-														{
-															el = element.data[i].values[j];
-															break;
-														}
+                var el = null;
+                for (i=0;i<element.data.length;i++)
+                for (j=0;j<element.data[i].values.length;j++)
+                if (element.data[i].values[j].id == day.dep)
+                {
+                el = element.data[i].values[j];
+                break;
+                }
 				
-												var hColor = "#FF0D00";		
-												var mouseover = function (e) {
-													  depS.css("border-color", hColor);
-													  depE.css("border-color", hColor);
-													  depS.css("z-index", "10002");
-													  depE.css("z-index", "10002");
-													  dep.css("z-index", "10000");
-													  dep.css("border-color", hColor);
-												};
-												var mouseout = function (e) {
-													  depS.css("border-color", "#fff");
-													  depE.css("border-color", "#fff");
-													  depS.css("z-index", "10001");
-													  depE.css("z-index", "10001");
-													  dep.css("z-index", "9999");
-													  dep.css("border-color", "#333");
-												};
+                var hColor = "#FF0D00";		
+                var mouseover = function (e) {
+                depS.css("border-color", hColor);
+                depE.css("border-color", hColor);
+                depS.css("z-index", "10002");
+                depE.css("z-index", "10002");
+                dep.css("z-index", "10000");
+                dep.css("border-color", hColor);
+                };
+                var mouseout = function (e) {
+                depS.css("border-color", "#fff");
+                depE.css("border-color", "#fff");
+                depS.css("z-index", "10001");
+                depE.css("z-index", "10001");
+                dep.css("z-index", "9999");
+                dep.css("border-color", "#333");
+                };
 														
-												if (el) {
-													depE.mouseover(function(e){
-														var hint = $("<div class='fn-gantt-hint' />").html(el.desc);
-														$("body").append(hint);
-														hint.css('left', e.pageX);
-														hint.css('top', e.pageY);
-														  hint.show();
-													  })
-													  .mouseout(function(){
-														  $(".fn-gantt-hint").remove();
-													  })
-													  .mousemove(function(e){
-														$('.fn-gantt-hint').css('left', e.pageX);
-													 $('.fn-gantt-hint').css('top', e.pageY+15);
-													 });
-												}
+                if (el) {
+                depE.mouseover(function(e){
+                var hint = $("<div class='fn-gantt-hint' />").html(el.desc);
+                $("body").append(hint);
+                hint.css('left', e.pageX);
+                hint.css('top', e.pageY);
+                hint.show();
+                })
+                .mouseout(function(){
+                $(".fn-gantt-hint").remove();
+                })
+                .mousemove(function(e){
+                $('.fn-gantt-hint').css('left', e.pageX);
+                $('.fn-gantt-hint').css('top', e.pageY+15);
+                });
+                }
 												
-												depS.mouseover(mouseover);
-												depS.mouseout(mouseout);
-												depE.mouseover(mouseover);
-												depE.mouseout(mouseout);
+                depS.mouseover(mouseover);
+                depS.mouseout(mouseout);
+                depE.mouseover(mouseover);
+                depE.mouseout(mouseout);
 												
-												var $rightPanel = $(element).find('.fn-gantt .rightPanel');
-												var $dataPanel = $rightPanel.find('.dataPanel');
-												$dataPanel.append(dep);
-												var depSh = dep.clone();
-												depSh.addClass("depLineSh");
-												$dataPanel.append(depSh);
-												$dataPanel.append(depS);
-												$dataPanel.append(depE);
-											}
-											else if (elemA.length>0 && elemB.length>0){
+                var $rightPanel = $(element).find('.fn-gantt .rightPanel');
+                var $dataPanel = $rightPanel.find('.dataPanel');
+                $dataPanel.append(dep);
+                var depSh = dep.clone();
+                depSh.addClass("depLineSh");
+                $dataPanel.append(depSh);
+                $dataPanel.append(depS);
+                $dataPanel.append(depE);
+                }
+                else if (elemA.length>0 && elemB.length>0){
 											
-												var depS = $("<div id='" + day.id+"-"+day.dep + "Start' class='depStart'></div>");
-												var depE = $("<div id='" + day.id+"-"+day.dep + "End' class='depEnd'></div>");
-				;
-												depS.css('background-color', elemB.css("background-color"));
-												depE.css('background-color', elemA.css("background-color"));
+                var depS = $("<div id='" + day.id+"-"+day.dep + "Start' class='depStart'></div>");
+                var depE = $("<div id='" + day.id+"-"+day.dep + "End' class='depEnd'></div>");
+                ;
+                depS.css('background-color', elemB.css("background-color"));
+                depE.css('background-color', elemA.css("background-color"));
 												
-												var dep = $("<div id='" + day.id+"-"+day.dep + "Top' class='depLine'></div>");
-												var dep2 = $("<div id='" + day.id+"-"+day.dep + "Bottom' class='depLine'></div>");
+                var dep = $("<div id='" + day.id+"-"+day.dep + "Top' class='depLine'></div>");
+                var dep2 = $("<div id='" + day.id+"-"+day.dep + "Bottom' class='depLine'></div>");
 												
-												var pa = elemA.position();
-												var pb = elemB.position();
+                var pa = elemA.position();
+                var pb = elemB.position();
 												
-												var ppa = elemA.parent().position();
-												var ppb = elemB.parent().position();
+                var ppa = elemA.parent().position();
+                var ppb = elemB.parent().position();
 												
-												var pA = {
-													left: ppa.left + elemA.outerWidth()+3,
-													top : ppa.top + Math.round(elemA.outerHeight()/2)+2
-												};
+                var pA = {
+                left: ppa.left + elemA.outerWidth()+3,
+                top : ppa.top + Math.round(elemA.outerHeight()/2)+2
+                };
 												
-												var pB = {
-													left: pb.left+1,
-													top : ppb.top + Math.round(elemB.outerHeight()/2)+2
-												};
+                var pB = {
+                left: pb.left+1,
+                top : ppb.top + Math.round(elemB.outerHeight()/2)+2
+                };
 				
-												console.log(pA, pB);
+                console.log(pA, pB);
 				
-												depS.css( 'left', pA.left-5 + "px  !important" );
-												depS.css( 'top' , pA.top-4  + "px !important" );
-												depE.css( 'left', pB.left-2 + "px !important" );
-												depE.css( 'top' , pB.top-4   + "px !important" );
+                depS.css( 'left', pA.left-5 + "px  !important" );
+                depS.css( 'top' , pA.top-4  + "px !important" );
+                depE.css( 'left', pB.left-2 + "px !important" );
+                depE.css( 'top' , pB.top-4   + "px !important" );
 				
-												var depLW = function(obj, left, width, borders) {
-													obj.css('left' , left  + "px");
-													obj.css('width', width + "px");
-													var bdStyle = "1px solid #333";
-													for (i=0; i<borders.length;i++) {
-														obj.css('border-' + borders[i], bdStyle);
-													}
-												};
+                var depLW = function(obj, left, width, borders) {
+                obj.css('left' , left  + "px");
+                obj.css('width', width + "px");
+                var bdStyle = "1px solid #333";
+                for (i=0; i<borders.length;i++) {
+                obj.css('border-' + borders[i], bdStyle);
+                }
+                };
 				
-												if (pA.top < pB.top) {
+                if (pA.top < pB.top) {
 				
-													var hW = Math.round( Math.abs(pA.left-pB.left)/2);
-													if (pA.left < pB.left) {
-														depLW(dep , pA.left   , hW  , ["top", "right"]);
-														depLW(dep2, pA.left+hW, hW  , ["left", "bottom"]);
-													} else {
-														depLW(dep , pB.left+hW, hW+5, ["right", "bottom"]);
-														depLW(dep2, pB.left , hW+5, ["top", "left"]);
-													}
+                var hW = Math.round( Math.abs(pA.left-pB.left)/2);
+                if (pA.left < pB.left) {
+                depLW(dep , pA.left   , hW  , ["top", "right"]);
+                depLW(dep2, pA.left+hW, hW  , ["left", "bottom"]);
+                } else {
+                depLW(dep , pB.left+hW, hW+5, ["right", "bottom"]);
+                depLW(dep2, pB.left , hW+5, ["top", "left"]);
+                }
 				
-													dep.css('top'   , pA.top+1          + "px");
-													dep.css('height', Math.floor((pB.top - pA.top)/2) + "px");
-													dep2.css('top'   , pA.top + Math.floor((pB.top - pA.top)/2) + 1 + "px");
-													dep2.css('height', Math.floor((pB.top - pA.top)/2) + "px");
-												} else {
-													var hW = Math.round( Math.abs(pA.left-pB.left)/2);
-													if (pA.left < pB.left) {
-														depLW(dep2 , pA.left   , hW , ["bottom", "right"]);
-														depLW(dep  , pA.left+hW, hW , ["left", "top"]);
-													} else {
-														depLW(dep2 , pB.left+hW, hW+5, ["top", "right"]);
-														depLW(dep  , pB.left , hW+5, ["left" , "bottom"]);
-													}
+                dep.css('top'   , pA.top+1          + "px");
+                dep.css('height', Math.floor((pB.top - pA.top)/2) + "px");
+                dep2.css('top'   , pA.top + Math.floor((pB.top - pA.top)/2) + 1 + "px");
+                dep2.css('height', Math.floor((pB.top - pA.top)/2) + "px");
+                } else {
+                var hW = Math.round( Math.abs(pA.left-pB.left)/2);
+                if (pA.left < pB.left) {
+                depLW(dep2 , pA.left   , hW , ["bottom", "right"]);
+                depLW(dep  , pA.left+hW, hW , ["left", "top"]);
+                } else {
+                depLW(dep2 , pB.left+hW, hW+5, ["top", "right"]);
+                depLW(dep  , pB.left , hW+5, ["left" , "bottom"]);
+                }
 													
-													dep.css('top'   , pB.top+1          + "px");
-													dep.css('height', Math.floor((pA.top - pB.top)/2) + "px");
-													dep2.css('top'   , pB.top + Math.floor((pA.top - pB.top)/2) + 1 + "px");
-													dep2.css('height', Math.floor((pA.top - pB.top)/2) + "px");
-												}
-												var hColor = "#FF0D00";
-												var mouseover = function(e){
-													  depS.css("border-color", hColor);
-													  depE.css("border-color", hColor);
-													  depS.css("z-index", "10002");
-													  depE.css("z-index", "10002");
-													  dep.css("z-index", "10000");
-													  dep2.css("z-index", "10000");
-													  dep.css("border-color", hColor);
-													  dep2.css("border-color", hColor);
-											   };
-											   var mouseout = function(e){
-													  depS.css("border-color", "#fff");
-													  depE.css("border-color", "#fff");
-													  depS.css("z-index", "10001");
-													  depE.css("z-index", "10001");
-													  dep.css("z-index", "9999");
-													  dep2.css("z-index", "9999");
-													  dep.css("border-color", "#333");
-													  dep2.css("border-color", "#333");
-											   };
-												depS.mouseover(mouseover);
-												depS.mouseout(mouseout);
-												depE.mouseover(mouseover);
-												depE.mouseout(mouseout);
+                dep.css('top'   , pB.top+1          + "px");
+                dep.css('height', Math.floor((pA.top - pB.top)/2) + "px");
+                dep2.css('top'   , pB.top + Math.floor((pA.top - pB.top)/2) + 1 + "px");
+                dep2.css('height', Math.floor((pA.top - pB.top)/2) + "px");
+                }
+                var hColor = "#FF0D00";
+                var mouseover = function(e){
+                depS.css("border-color", hColor);
+                depE.css("border-color", hColor);
+                depS.css("z-index", "10002");
+                depE.css("z-index", "10002");
+                dep.css("z-index", "10000");
+                dep2.css("z-index", "10000");
+                dep.css("border-color", hColor);
+                dep2.css("border-color", hColor);
+                };
+                var mouseout = function(e){
+                depS.css("border-color", "#fff");
+                depE.css("border-color", "#fff");
+                depS.css("z-index", "10001");
+                depE.css("z-index", "10001");
+                dep.css("z-index", "9999");
+                dep2.css("z-index", "9999");
+                dep.css("border-color", "#333");
+                dep2.css("border-color", "#333");
+                };
+                depS.mouseover(mouseover);
+                depS.mouseout(mouseout);
+                depE.mouseover(mouseover);
+                depE.mouseout(mouseout);
 												
-												var $rightPanel = $(element).find('.fn-gantt .rightPanel');
-												var $dataPanel = $rightPanel.find('.dataPanel');
-												$dataPanel.append(dep);
-												$dataPanel.append(dep2);
-												var depSh = dep.clone();
-												var dep2Sh = dep2.clone();
-												depSh.addClass("depLineSh");
-												dep2Sh.addClass("depLineSh");
-												$dataPanel.append(depSh);
-												$dataPanel.append(dep2Sh);
-												$dataPanel.append(depS);
-												$dataPanel.append(depE);
-											}
-										}
-									});
-								});*/
-				
+                var $rightPanel = $(element).find('.fn-gantt .rightPanel');
+                var $dataPanel = $rightPanel.find('.dataPanel');
+                $dataPanel.append(dep);
+                $dataPanel.append(dep2);
+                var depSh = dep.clone();
+                var dep2Sh = dep2.clone();
+                depSh.addClass("depLineSh");
+                dep2Sh.addClass("depLineSh");
+                $dataPanel.append(depSh);
+                $dataPanel.append(dep2Sh);
+                $dataPanel.append(depS);
+                $dataPanel.append(depE);
+                }
+                }
+                });
+                });*/
+
             },
             // **Navigation**
             navigateTo: function (element, val) {
@@ -1757,9 +1813,21 @@
                 var end = new Date(to);
                 var ret = [];
                 var i = 0;
-                do {
+                for (; ; ) {
+
                     ret[i] = new Date(current.getTime());
+
+                    // Daylight saving issue!! -- STEVE
+                    var prevValue = current.getHours();
                     current.setHours(current.getHours() + scaleStep);
+                    if (prevValue == 0 && current.getHours() == 0)
+                        current.setHours(current.getHours() + scaleStep + 1);
+
+                    // Check before applying floor, to avoid deadlocks.
+                    if (current.getTime() > to.getTime()) {
+                        break;
+                    }
+
                     current.setHours(Math.floor((current.getHours()) / scaleStep) * scaleStep);
 
                     if (current.getDay() !== ret[i].getDay()) {
@@ -1767,7 +1835,8 @@
                     }
 
                     i++;
-                } while (current.getTime() <= to.getTime());
+                };
+
                 return ret;
             },
 
@@ -1914,11 +1983,14 @@
                 }
             }
 
+
+            this.headerRows = settings.singleDateLine ? 0 : 2;
+
             switch (settings.scale) {
-                case "hours": this.headerRows = 5; this.scaleStep = 1; break;
-                case "weeks": this.headerRows = 3; this.scaleStep = 13; break;
-                case "months": this.headerRows = 2; this.scaleStep = 14; break;
-                default: this.headerRows = 4; this.scaleStep = 13; break;
+                case "hours": this.headerRows = this.headerRows + 2; this.scaleStep = settings.defaultHourlyScaleStep; break;
+                case "weeks": this.headerRows = this.headerRows + 1; this.scaleStep = 13; break;
+                case "months": this.headerRows = this.headerRows; this.scaleStep = 14; break;
+                default: this.headerRows = this.headerRows + 2; this.scaleStep = 13; break;
             }
 
             this.scrollNavigation = {

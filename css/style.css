@@ -66,8 +66,13 @@
     float: left;
     height: 23px;
     margin: 0;
-    border-bottom: 1px solid #DDD;
+    border-top: 1px solid #fff8da;
     background-color: #f6f6f6;
+}
+
+.fn-gantt .leftPanel .blockHeader {
+	border-top: 1px solid #DDD;
+	margin: 0;
 }
 
 .fn-gantt .leftPanel .name {
@@ -101,7 +106,7 @@
 .fn-gantt .dataPanel {
     margin-left: 0px;
     border-right: 1px solid #DDD;
-    background-image: url(../img/grid.png);
+    /*background-image: url(../img/grid.png);*/
     background-repeat: repeat;
     background-position: 24px 24px;
     position: relative;
@@ -121,6 +126,25 @@
     text-align: center;
 }
 
+.fn-gantt .daycell 
+{
+    overflow: visible;
+    width: 24px;
+    line-height: 24px;
+    text-align: center;    
+ 	border-left: 1px solid #DDD;
+    margin: -1px 0 0 -1px;
+    font-size: 11px;
+    color: #484a4d;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.75);
+    text-align: center; 	
+}
+
+.fn-gantt .daycell.blockHeader
+{
+    border-top: 1px solid #DDD;
+}
+
 .fn-gantt .holiday {
     background-color: #ffd263;
     height: 23px;
@@ -137,7 +161,7 @@
 
 .fn-gantt .sa, .fn-gantt .sn, .fn-gantt .wd {
     height: 23px;
-    margin: 0 0 0 -1px;
+    /*margin: 0 0 0 -1px;*/
     text-align: center;
 }
 
@@ -208,10 +232,11 @@
 }
 
 .fn-gantt .ganttRed {
-    background-color: #F9C4E1;
+    /*background-color: #F9C4E1;*/
+    background-color: red;
 }
 .fn-gantt .ganttRed .fn-label {
-    color: #78436D !important;
+    color: #78436D !important;    
 }
 
 .fn-gantt .ganttGreen {
