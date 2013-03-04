@@ -39,7 +39,7 @@
             startPos: new Date(),
             navigate: "buttons",
             scale: "days",
-            defaultHourlyScaleStep: 6,
+            defaultHourlyScaleStep: 3,
             useCookie: false,
             maxScale: "months",
             minScale: "hours",
@@ -204,11 +204,13 @@
                 // Initialize data with a json object or fetch via an xhr
                 // request depending on `settings.source`
                 if (typeof settings.source !== "string") {
-                    element.data = settings.source;
+                    element.data = settings.source.bookings;
+                    element.headers = settings.source.headers;
                     core.init(element);
                 } else {
                     $.getJSON(settings.source, function (jsData) {
-                        element.data = jsData;
+                        element.data = jsData.bookings;
+                        element.headers = jsData.headers;
                         core.init(element);
                     });
                 }
@@ -433,6 +435,8 @@
 
                 var horArr = [];
 
+                var headArr = [];
+
 
                 var today = new Date();
                 today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -440,7 +444,7 @@
 
                 // Setup the headings based on the chosen `settings.scale`
                 switch (settings.scale) {
-                    // **Hours**                         
+                    // **Hours**                                                              
                     case "hours":
 
                         range = tools.parseTimeRange(element.dateStart, element.dateEnd, element.scaleStep);
@@ -498,15 +502,28 @@
 
                                 var day_class2 = (today - day === 0) ? ' today' : (holidays.indexOf(getTime) > -1) ? "holiday" : dowClass[getDay];
 
+                                // TODO: Use jquery globalization
+                                var dt = ('0' + day.getDate()).substr(-2, 2) + '/' + ('0' + day.getMonth()).substr(-2, 2) + '/' + ('0' + day.getFullYear()).substr(-2, 2);
+                                var dateLabel = settings.singleDateLine ? dt : settings.dow[getDay];
+
+                                dowArr.push('<div class="row day ' + day_class2 + '" '
+                                        + ' style="width: ' + tools.getCellSize() * hoursInDay + 'px;"> '
+                                        + ' <div class="fn-label">' + dateLabel + '</div></div>');
+
+                                if (settings.showDayHeaders) {
+                                    var dayLabel = tools.getDayHeader(element.headers, rday);
+                                    headArr.push('<div class="row date ' + day_class2 + '" '
+                                            + ' style="width: ' + tools.getCellSize() * hoursInDay + 'px;"> '
+                                            + ' <div class="fn-label">' + dayLabel + '</div></div>');
+                                }
+
+
                                 if (!settings.singleDateLine) {
                                     dayArr.push('<div class="row date ' + day_class2 + '" '
                                             + ' style="width: ' + tools.getCellSize() * hoursInDay + 'px;"> '
                                             + ' <div class="fn-label">' + day.getDate() + '</div></div>');
                                 }
 
-                                dowArr.push('<div class="row day ' + day_class2 + '" '
-                                        + ' style="width: ' + tools.getCellSize() * hoursInDay + 'px;"> '
-                                        + ' <div class="fn-label">' + settings.dow[getDay] + '</div></div>');
 
                                 day = rday;
                                 hoursInDay = 0;
@@ -530,7 +547,7 @@
                                + tools.getCellSize() * daysInYear + 'px;"><div class="fn-label">'
                             + year
                             + '</div></div>');
-                        
+
                             // Last month
                             monthArr.push(
                                 '<div class="row header month" style="width: '
@@ -543,17 +560,28 @@
                             if (holidays.indexOf((new Date(day.getFullYear(), day.getMonth(), day.getDate())).getTime()) > -1) {
                                 day_class = "holiday";
                             }
-                        
+
                             dayArr.push('<div class="row date ' + day_class + '" '
                                 + ' style="width: ' + tools.getCellSize() * hoursInDay + 'px;"> '
                                 + ' <div class="fn-label">' + day.getDate() + '</div></div>');
                         }
 
+                        // last day
+                        var dt = ('0' + day.getDate()).substr(-2, 2) + '/' + ('0' + day.getMonth()).substr(-2, 2) + '/' + ('0' + day.getFullYear()).substr(-2, 2);
+                        var dateLabel = settings.singleDateLine ? dt : settings.dow[getDay];
                         dowArr.push('<div class="row day ' + day_class + '" '
                                 + ' style="width: ' + tools.getCellSize() * hoursInDay + 'px;"> '
-                                + ' <div class="fn-label">' + settings.dow[day.getDay()] + '</div></div>');
+                                + ' <div class="fn-label">' + dateLabel + '</div></div>');
 
-                        var dataPanel = core.dataPanel(element, range.length * tools.getCellSize());
+                        // last header
+                        if (settings.showDayHeaders) {
+                            var dayLabel = tools.getDayHeader(element.headers, day);
+                            headArr.push('<div class="row date ' + day_class2 + '" '
+                                            + ' style="width: ' + tools.getCellSize() * hoursInDay + 'px;"> '
+                                            + ' <div class="fn-label">' + dayLabel + '</div></div>');
+                        }
+
+                        var dataPanel = core.dataPanel(element, (range.length - 1) * tools.getCellSize());
 
 
                         // Append panel elements
@@ -561,6 +589,8 @@
                         dataPanel.append(monthArr.join(""));
                         dataPanel.append($('<div class="row"/>').html(dayArr.join("")));
                         dataPanel.append($('<div class="row"/>').html(dowArr.join("")));
+                        if (settings.showDayHeaders)
+                            dataPanel.append($('<div class="row"/>').html(headArr.join("")));
                         dataPanel.append($('<div class="row"/>').html(horArr.join("")));
 
                         /*
@@ -599,8 +629,9 @@
                                 };
 
                                 // Last Day
+                                var blockHeadCls = $.trim(entry.name) != '' ? ' blockHeader' : ''
                                 var size = (tools.getCellSize() * hoursInDay);
-                                dRow += '<div class="row day ' + todayCls + '" id="d' + i + '-' + tools.genId(day.getTime()) + '" style="width:' + size + 'px;"></div>';
+                                dRow += '<div class="row daycell ' + blockHeadCls + todayCls + '" id="d' + i + '-' + tools.genId(day.getTime()) + '" style="width:' + size + 'px;"></div>';
 
                                 dataPanel.append($(dRow + '</div>'));
                             }
@@ -608,7 +639,7 @@
 
                         break;
 
-                    // **Weeks**                         
+                    // **Weeks**                                                              
                     case "weeks":
                         range = tools.parseWeeksRange(element.dateStart, element.dateEnd);
                         yearArr = ['<div class="row"/>'];
@@ -673,7 +704,7 @@
 
                         break;
 
-                    // **Months**                         
+                    // **Months**                                                              
                     case 'months':
                         range = tools.parseMonthsRange(element.dateStart, element.dateEnd);
 
@@ -724,7 +755,7 @@
 
                         break;
 
-                    // **Days (default)**                         
+                    // **Days (default)**                                                              
                     default:
                         range = tools.parseDateRange(element.dateStart, element.dateEnd);
 
@@ -1081,9 +1112,17 @@
                             var _bar = null;
 
                             switch (settings.scale) {
-                                // **Hourly data**                         
+                                // **Hourly data**                                                              
                                 case "hours":
+
+
+                                    //var t = new Date(day.from);
+
+                                    //alert(tools.dateDeserialize(day.from).getTime());
+
                                     var dFrom = tools.genId(tools.dateDeserialize(day.from).getTime(), element.scaleStep);
+
+
                                     var from = $(element).find('#dh-' + dFrom);
 
                                     var dTo = tools.genId(tools.dateDeserialize(day.to).getTime(), element.scaleStep);
@@ -1106,12 +1145,12 @@
                                     var topEl = $(element).find("#rowheader" + i);
 
                                     var top = tools.getCellSize() * element.headerRows + 2 + parseInt(topEl.attr("offset"), 10);
-                                    _bar.css({ 'margin-top': top, 'margin-left': Math.floor(cFrom) });
+                                    _bar.css({ 'margin-top': top, 'margin-left': Math.floor(cFrom - tools.getCellSize()) });
 
                                     datapanel.append(_bar);
                                     break;
 
-                                // **Weekly data**                         
+                                // **Weekly data**                                                              
                                 case "weeks":
                                     var dtFrom = tools.dateDeserialize(day.from);
                                     var dtTo = tools.dateDeserialize(day.to);
@@ -1155,7 +1194,7 @@
                                     datapanel.append(_bar);
                                     break;
 
-                                // **Monthly data**                         
+                                // **Monthly data**                                                              
                                 case "months":
                                     var dtFrom = tools.dateDeserialize(day.from);
                                     var dtTo = tools.dateDeserialize(day.to);
@@ -1196,7 +1235,7 @@
                                     datapanel.append(_bar);
                                     break;
 
-                                // **Days**                         
+                                // **Days**                                                              
                                 default:
                                     var dFrom = tools.genId(tools.dateDeserialize(day.from).getTime());
                                     var dTo = tools.genId(tools.dateDeserialize(day.to).getTime());
@@ -1727,6 +1766,16 @@
         // =================
         var tools = {
 
+            getDayHeader: function (headers, day) {
+                var ret = '';
+                $.each(headers, function (i, header) {
+                    if (tools.dateDeserialize(header.date) - day == 0) {
+                        ret = header.text;
+                    }
+                });
+                return ret;
+            },
+
             // Return the maximum available date in data depending on the scale
             getMaxDate: function (element) {
                 var maxDate = null;
@@ -1881,7 +1930,8 @@
             dateDeserialize: function (dateStr) {
                 //return eval("new" + dateStr.replace(/\//g, " "));
                 var date = eval("new" + dateStr.replace(/\//g, " "));
-                return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes());
+                var dt = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes());
+                return dt;
             },
 
             // Generate an id for a date
@@ -1962,6 +2012,7 @@
             }
 
             this.data = null;        // Received data
+            this.headers = null;
             this.pageNum = 0;        // Current page number
             this.pageCount = 0;      // Available pages count
             this.rowsOnLastPage = 0; // How many rows on last page
@@ -1985,6 +2036,8 @@
 
 
             this.headerRows = settings.singleDateLine ? 0 : 2;
+            if (settings.showDayHeaders)
+                this.headerRows++;
 
             switch (settings.scale) {
                 case "hours": this.headerRows = this.headerRows + 2; this.scaleStep = settings.defaultHourlyScaleStep; break;

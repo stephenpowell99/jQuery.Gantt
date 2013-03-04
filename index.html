@@ -5,8 +5,6 @@
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=Edge;chrome=1" >
         <link rel="stylesheet" href="css/style.css" />
-        <link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" />
-        <link rel="stylesheet" href="http://taitems.github.com/UX-Lab/core/css/prettify.css" />
 		<style type="text/css">
 			body {
 				font-family: Helvetica, Arial, sans-serif;
@@ -425,92 +423,159 @@ values: [{
 		</div>
 
     </body>
-	<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+	<script src="js/jquery-1.7.min.js"></script>
 	<script src="js/jquery.fn.gantt.js"></script>
-	<script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-tooltip.js"></script>
-	<script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-popover.js"></script>
-	<script src="http://taitems.github.com/UX-Lab/core/js/prettify.js"></script>
+	
     <script>
 
-		$(function() {
+        $(function () {
 
-			"use strict";
+            "use strict";
 
-			$(".gantt").gantt({
-				source: [{
-					name: "John Peters",
-					desc: "Activity",
-					values: [{
-						id: "t01",
-						from: "/Date(1320192000000)/",
-						to: "/Date(1320192100000)/",
-						label: "xxx", 
-						customClass: "ganttRed"
-		}, {
-		    id: "t031",
-		    from: "/Date(1320192100000)/",
-		    to: "/Date(1320192600000)/",
-		    label: "ttttyyyyy",
-		    customClass: "ganttRed"
-		}]
-				},{
-					name: " ",
-					desc: " ",
-					values: [{
-						id: "t02",
-						from: "/Date(1322611200000)/",
-						to: "/Date(1323302400000)/",
-						label: "Scoping",   
-						customClass: "ganttRed"
-					}]
-                },{
-                    name: "Lisa Simpson",
-                    desc: "Activity",
-                    values: [{
-                        id: "t01",
-                        from: "/Date(1320192000000)/",
-                        to: "/Date(1322401600000)/",
-                        label: "Requirement Gathering",
-                        customClass: "ganttRed"
+            $(".gantt").gantt({
+                source: {
+                    headers: [{
+                        date: "/Date(1320278400000)/",
+                        text: "Team 50% utilized"
+                    }],
+                    bookings: [{
+                        name: "John Peters",
+                        desc: " ",
+                        values: []
+                    },
+                    {
+                        name: "",
+                        desc: "Bookings",
+                        values: [{
+                            id: "txx",
+                            from: "/Date(1320192000000)/",
+                            to: "/Date(1320192800000)/",
+                            label: "",
+                            customClass: "ganttBlue"
+                        }, {
+                            id: "tyy",
+                            from: "/Date(1320300800000)/",
+                            to: "/Date(1320400800000)/",
+                            label: "",
+                            customClass: "ganttBlue"
+                        }]
+                    },
+                    {
+                        name: "",
+                        desc: "Events",
+                        values: [{
+                            id: "txx",
+                            from: "/Date(1320192000000)/",
+                            to: "/Date(1320192800000)/",
+                            label: "",
+                            customClass: "ganttGreen"
+                        }, {
+                            id: "tyy",
+                            from: "/Date(1320300800000)/",
+                            to: "/Date(1320400800000)/",
+                            label: "",
+                            customClass: "ganttGreen"
+                        }]
+                    }, {
+                        name: "",
+                        desc: "Absent",
+                        values: [{
+                            id: "txx",
+                            from: "/Date(1320192000000)/",
+                            to: "/Date(1320192800000)/",
+                            label: "",
+                            customClass: "ganttOrange"
+                        }, {
+                            id: "tyy",
+                            from: "/Date(1320300800000)/",
+                            to: "/Date(1320400800000)/",
+                            label: "",
+                            customClass: "ganttOrange"
+                        }]
+                    }, {
+                        name: "Ken Loach",
+                        desc: " ",
+                        values: []
+                    },
+                    {
+                        name: "",
+                        desc: "Bookings",
+                        values: [{
+                            id: "txx",
+                            from: "/Date(1320192000000)/",
+                            to: "/Date(1320192800000)/",
+                            label: "",
+                            customClass: "ganttBlue"
+                        }, {
+                            id: "tyy",
+                            from: "/Date(1320300800000)/",
+                            to: "/Date(1320400800000)/",
+                            label: "",
+                            customClass: "ganttBlue"
+                        }]
+                    },
+                    {
+                        name: "",
+                        desc: "Events",
+                        values: [{
+                            id: "txx",
+                            from: "/Date(1320192000000)/",
+                            to: "/Date(1320192800000)/",
+                            label: "",
+                            customClass: "ganttGreen"
+                        }, {
+                            id: "tyy",
+                            from: "/Date(1320300800000)/",
+                            to: "/Date(1320400800000)/",
+                            label: "",
+                            customClass: "ganttGreen"
+                        }]
+                    }, {
+                        name: "",
+                        desc: "Absent",
+                        values: [{
+                            id: "txx",
+                            from: "/Date(1320192000000)/",
+                            to: "/Date(1320192800000)/",
+                            label: "",
+                            customClass: "ganttOrange"
+                        }, {
+                            id: "tyy",
+                            from: "/Date(1320300800000)/",
+                            to: "/Date(1320400800000)/",
+                            label: "",
+                            customClass: "ganttOrange"
+                        }]
                     }]
-                }, {
-                    name: " ",
-                    desc: "Absent",
-                    values: [{
-                        id: "t02",
-                        from: "/Date(1322611200000)/",
-                        to: "/Date(1322611300000)/",
-                        label: "Scoping",
-                        customClass: "ganttRed"
-                    }]
-                }],
-				navigate: "scroll",
-				scale: "hours",
-				maxScale: "hours",
-				minScale: "hours",
-				itemsPerPage: 10,
-				scrollToToday: true,
+                },
+                navigate: "scroll",
+                scale: "hours",
+                maxScale: "hours",
+                minScale: "hours",
+                itemsPerPage: 10,
+                scrollToToday: true,
                 singleDateLine: true,
-				onItemClick: function(data) {
-					alert("Item clicked - show some details");
-				},
-				onRender: function() {
-					if (window.console && typeof console.log === "function") {
-						console.log("chart rendered");
-					}
-				}
-			});
+                showDayHeaders: true,
+                onItemClick: function (data) {
+                    alert("Item clicked - show some details");
+                },
+                onRender: function () {
+                    if (window.console && typeof console.log === "function") {
+                        console.log("chart rendered");
+                    }
+                }
+            });
 
-			$(".gantt").popover({
-				selector: ".bar",
-				title: "I'm a popover",
-				content: "And I'm the content of said popover.",
-				trigger: "hover"
-			});
+            $(".gantt").popover({
+                selector: ".bar",
+                title: "I'm a popover",
+                content: "And I'm the content of said popover.",
+                trigger: "hover"
+            });
 
-			prettyPrint();
+            prettyPrint();
 
-		});
+        });
 
     </script>
 </html>
