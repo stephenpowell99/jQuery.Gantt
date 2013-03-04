@@ -442,51 +442,21 @@ values: [{
 					desc: "Activity",
 					values: [{
 						id: "t01",
-						from: "/Date(1320192000000)/",
-						to: "/Date(1322401600000)/",
-						label: "Requirement Gathering", 
+						from: "/Date(1362355505000)/",
+						to: "/Date(1362477903000)/",
+						label: "xddddd", 
 						customClass: "ganttRed"
-					}]
-				},{
-					name: " ",
-					desc: " ",
-					values: [{
-						id: "t02",
-						from: "/Date(1322611200000)/",
-						to: "/Date(1323302400000)/",
-						label: "Scoping", 
-						customClass: "ganttRed",
-						dep: "t01"
-					}]
-                },{
-                    name: "Lisa Simpson",
-                    desc: "Activity",
-                    values: [{
-                        id: "t01",
-                        from: "/Date(1320192000000)/",
-                        to: "/Date(1322401600000)/",
-                        label: "Requirement Gathering",
-                        customClass: "ganttRed"
-                    }]
-                }, {
-                    name: " ",
-                    desc: "Absent",
-                    values: [{
-                        id: "t02",
-                        from: "/Date(1322611200000)/",
-                        to: "/Date(1323302400000)/",
-                        label: "Scoping",
-                        customClass: "ganttRed",
-                        dep: "t01"
-                    }]
-                }],
+		            }]
+
+        
+				}],
 				navigate: "scroll",
 				scale: "hours",
 				maxScale: "hours",
 				minScale: "hours",
 				itemsPerPage: 10,
 				scrollToToday: true,
-                singleDateLine: true,
+                singleDateLine: false,
 				onItemClick: function(data) {
 					alert("Item clicked - show some details");
 				},
